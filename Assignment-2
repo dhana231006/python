@@ -1,0 +1,105 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyNiZEpQFmjODwsr0bL6xxQ4",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/dhana231006/python/blob/main/Assignment-2\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 4,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "rH9U4btaERsD",
+        "outputId": "c296a72f-5b0a-4001-ff26-1968aa2bfb4b"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Current Traffic Conditions:\n",
+            "Estimated Travel Time: None\n",
+            "No major incidents reported.\n"
+          ]
+        }
+      ],
+      "source": [
+        "import requests\n",
+        "\n",
+        "def fetch_traffic_data(api_key, start_point, destination):\n",
+        "    base_url = \"https://maps.googleapis.com/maps/api/directions/json\"\n",
+        "    params = {\n",
+        "        \"origin\": start_point,\n",
+        "        \"destination\": destination,\n",
+        "        \"key\": api_key,\n",
+        "        \"departure_time\": \"now\",\n",
+        "    }\n",
+        "\n",
+        "    response = requests.get(base_url, params=params)\n",
+        "\n",
+        "    if response.status_code == 200:\n",
+        "        return response.json()\n",
+        "    else:\n",
+        "        print(f\"Error fetching data: {response.status_code}\")\n",
+        "        return None\n",
+        "\n",
+        "def parse_traffic_data(data):\n",
+        "    if data and data.get(\"routes\"):\n",
+        "        route = data[\"routes\"][0]\n",
+        "        traffic_conditions = route[\"legs\"][0][\"traffic_speed_entry\"]\n",
+        "        travel_time = route[\"legs\"][0][\"duration_in_traffic\"][\"text\"]\n",
+        "        incidents = route[\"legs\"][0].get(\"traffic_incidents\", [])\n",
+        "        return traffic_conditions, travel_time, incidents\n",
+        "    else:\n",
+        "        return None, None, None\n",
+        "\n",
+        "def display_traffic_data(traffic_conditions, travel_time, incidents):\n",
+        "    print(\"Current Traffic Conditions:\")\n",
+        "    print(f\"Estimated Travel Time: {travel_time}\")\n",
+        "\n",
+        "    if incidents:\n",
+        "        print(\"Incidents or Delays:\")\n",
+        "        for incident in incidents:\n",
+        "            print(f\"- {incident['description']}\")\n",
+        "    else:\n",
+        "        print(\"No major incidents reported.\")\n",
+        "\n",
+        "api_key = \"YOUR_GOOGLE_MAPS_API_KEY\"\n",
+        "start_point = \"New York, NY\"\n",
+        "destination = \"Los Angeles, CA\"\n",
+        "\n",
+        "traffic_data = fetch_traffic_data(api_key, start_point, destination)\n",
+        "\n",
+        "if traffic_data:\n",
+        "    traffic_conditions, travel_time, incidents = parse_traffic_data(traffic_data)\n",
+        "    display_traffic_data(traffic_conditions, travel_time, incidents)\n",
+        "else:\n",
+        "    print(\"Unable to fetch traffic data.\")\n"
+      ]
+    }
+  ]
+}
