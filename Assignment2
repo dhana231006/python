@@ -1,0 +1,51 @@
+import requests
+
+def fetch_traffic_data(api_key, start_point, destination):
+    base_url = "https://maps.googleapis.com/maps/api/directions/json"
+    params = {
+        "origin": start_point,
+        "destination": destination,
+        "key": api_key,
+        "departure_time": "now",  
+    }
+    
+    response = requests.get(base_url, params=params)
+    
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(f"Error fetching data: {response.status_code}")
+        return None
+
+def parse_traffic_data(data):
+    if data and data.get("routes"):
+        route = data["routes"][0]
+        traffic_conditions = route["legs"][0]["traffic_speed_entry"]
+        travel_time = route["legs"][0]["duration_in_traffic"]["text"]
+        incidents = route["legs"][0].get("traffic_incidents", [])
+        return traffic_conditions, travel_time, incidents
+    else:
+        return None, None, None
+
+def display_traffic_data(traffic_conditions, travel_time, incidents):
+    print("Current Traffic Conditions:")
+    print(f"Estimated Travel Time: {travel_time}")
+    
+    if incidents:
+        print("Incidents or Delays:")
+        for incident in incidents:
+            print(f"- {incident['description']}")
+    else:
+        print("No major incidents reported.")
+    
+api_key = "YOUR_GOOGLE_MAPS_API_KEY"
+start_point = "New York, NY"
+destination = "Los Angeles, CA"
+
+traffic_data = fetch_traffic_data(api_key, start_point, destination)
+
+if traffic_data:
+    traffic_conditions, travel_time, incidents = parse_traffic_data(traffic_data)
+    display_traffic_data(traffic_conditions, travel_time, incidents)
+else:
+    print("Unable to fetch traffic data.")
